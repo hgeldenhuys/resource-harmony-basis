@@ -237,38 +237,7 @@ document.getElementById('modal-overlay').addEventListener('click', function(e) {
   if (e.target === e.currentTarget) closeModal();
 });
 
-// ==================== SSE ====================
-var sseRetryDelay = 2000;
-function connectSSE() {
-  var sse = new EventSource('/api/sse');
-  sse.addEventListener('change', function(e) {
-    try {
-      var event = JSON.parse(e.data);
-      if (event.table) {
-        loadAllData(true);
-        showToast('Real-time update: ' + event.table, 'info');
-      }
-    } catch (err) {}
-    sseRetryDelay = 2000;
-  });
-  sse.onopen = function() {
-    sseRetryDelay = 2000;
-    var ind = document.getElementById('sse-indicator');
-    var status = document.getElementById('sse-status');
-    if (ind) ind.className = 'w-2 h-2 rounded-full bg-emerald-400';
-    if (status) status.textContent = 'Live';
-  };
-  sse.onerror = function() {
-    sse.close();
-    var ind = document.getElementById('sse-indicator');
-    var status = document.getElementById('sse-status');
-    if (ind) ind.className = 'w-2 h-2 rounded-full bg-red-400';
-    if (status) status.textContent = 'Reconnecting...';
-    setTimeout(connectSSE, sseRetryDelay);
-    sseRetryDelay = Math.min(sseRetryDelay * 2, 30000);
-  };
-}
-connectSSE();
+// SSE disabled
 
 // ==================== HELPERS ====================
 function esc(str) { var d = document.createElement('div'); d.textContent = str || ''; return d.innerHTML; }
