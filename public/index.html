@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resource Harmony</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', system-ui, sans-serif; }
+    .sidebar-link { transition: all 0.15s ease; }
+    .sidebar-link:hover { background: rgba(79, 70, 229, 0.06); color: #4338ca; }
+    .sidebar-link.active { background: #eef2ff; color: #4338ca; border-left: 3px solid #4f46e5; }
+    .card { transition: all 0.2s ease; }
+    .card:hover { transform: translateY(-1px); box-shadow: 0 8px 25px rgba(0,0,0,0.06); }
+    .fade-in { animation: fadeIn 0.25s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    .gauge-bar { transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+    .toast-enter { animation: toastIn 0.3s ease-out; }
+    .toast-exit { animation: toastOut 0.3s ease-in forwards; }
+    @keyframes toastIn { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
+    @keyframes toastOut { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(100%); } }
+    .modal-backdrop { background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); }
+    input[type="number"]::-webkit-inner-spin-button { opacity: 1; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  </style>
+</head>
+<body class="h-full bg-slate-50 text-slate-800">
+
+<!-- Toast container -->
+<div id="toast-container" class="fixed top-4 right-4 z-[100] flex flex-col gap-2 max-w-sm"></div>
+
+<!-- Modal container -->
+<div id="modal-overlay" class="fixed inset-0 z-50 hidden items-center justify-center modal-backdrop">
+  <div id="modal-content" class="bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 max-h-[90vh] overflow-y-auto"></div>
+</div>
+
+<!-- App shell -->
+<div class="flex h-full">
+  <!-- Sidebar -->
+  <aside id="sidebar" class="w-64 bg-white border-r border-slate-200 flex flex-col flex-shrink-0 h-screen sticky top-0">
+    <div class="p-5 border-b border-slate-100">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-700 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        </div>
+        <div>
+          <h1 class="text-slate-900 font-bold text-sm tracking-tight">Resource Harmony</h1>
+          <p class="text-[10px] text-slate-400 uppercase tracking-widest font-medium">Basis Edition</p>
+        </div>
+      </div>
+    </div>
+    <nav class="flex-1 py-4 px-3 space-y-1">
+      <a href="/" data-route="/" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600">
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        Dashboard
+      </a>
+      <a href="/team" data-route="/team" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600">
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        Team
+      </a>
+      <a href="/projects" data-route="/projects" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600">
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+        Projects
+      </a>
+      <a href="/allocations" data-route="/allocations" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600">
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        Allocations
+      </a>
+      <a href="/reports" data-route="/reports" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600">
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        Reports
+      </a>
+    </nav>
+    <div class="p-4 border-t border-slate-100">
+      <div class="flex items-center gap-2 text-xs text-slate-400">
+        <div id="sse-indicator" class="w-2 h-2 rounded-full bg-slate-300"></div>
+        <span id="sse-status">Connecting...</span>
+      </div>
+      <a href="/__auth/logout" class="mt-3 flex items-center gap-2 text-xs text-slate-400 hover:text-slate-600 transition-colors">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        Sign Out
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="flex-1 overflow-y-auto h-screen">
+    <div id="app" class="p-6 lg:p-8 max-w-7xl mx-auto"></div>
+  </main>
+</div>
+
+<script>
+// ==================== STATE ====================
+const state = {
+  teamMembers: [],
+  projects: [],
+  allocations: [],
+  loading: true,
+  currentRoute: '/',
+  allocMonth: new Date().toISOString().slice(0, 7),
+};
+
+// ==================== API ====================
+async function api(path, options) {
+  options = options || {};
+  try {
+    const resp = await fetch('/api/' + path, {
+      ...options,
+      headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+    });
+    if (!resp.ok) {
+      const err = await resp.json().catch(function() { return { error: 'Request failed' }; });
+      const msg = typeof err.error === 'string' ? err.error : (err.error && err.error.message) ? err.error.message : err.message || 'Request failed';
+      throw new Error(msg);
+    }
+    return resp.json();
+  } catch (e) {
+    showToast(e.message, 'error');
+    throw e;
+  }
+}
+
+async function loadAllData(silent) {
+  if (!silent) state.loading = true;
+  try {
+    const results = await Promise.all([
+      api('team_members?order=name.asc'),
+      api('rh_projects?order=name.asc'),
+      api('allocations?order=period_month.desc'),
+    ]);
+    state.teamMembers = results[0].data || results[0] || [];
+    state.projects = results[1].data || results[1] || [];
+    state.allocations = results[2].data || results[2] || [];
+  } catch (e) {
+    console.error('Failed to load data:', e);
+  }
+  state.loading = false;
+  if (!silent) render();
+  else renderCurrentView();
+}
+
+// ==================== TOAST ====================
+function showToast(message, type) {
+  type = type || 'info';
+  var container = document.getElementById('toast-container');
+  var toast = document.createElement('div');
+  var colors = {
+    info: 'bg-slate-800 border-slate-700 text-white',
+    success: 'bg-emerald-600 border-emerald-500 text-white',
+    error: 'bg-red-600 border-red-500 text-white',
+    warning: 'bg-amber-500 border-amber-400 text-white',
+  };
+  var icons = {
+    info: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>',
+    success: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>',
+    error: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>',
+    warning: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>',
+  };
+  toast.className = 'toast-enter flex items-center gap-3 px-4 py-3 rounded-xl border shadow-lg text-sm font-medium ' + (colors[type] || colors.info);
+  toast.innerHTML = '<svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">' + (icons[type] || icons.info) + '</svg><span class="flex-1">' + esc(message) + '</span>';
+  container.appendChild(toast);
+  setTimeout(function() {
+    toast.classList.remove('toast-enter');
+    toast.classList.add('toast-exit');
+    setTimeout(function() { toast.remove(); }, 300);
+  }, 3500);
+}
+
+// ==================== MODAL ====================
+function showModal(title, bodyHtml, footerHtml) {
+  var overlay = document.getElementById('modal-overlay');
+  var content = document.getElementById('modal-content');
+  content.innerHTML =
+    '<div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">' +
+      '<h3 class="text-lg font-semibold text-slate-900">' + title + '</h3>' +
+      '<button onclick="closeModal()" class="p-1 rounded-lg hover:bg-slate-100 transition-colors">' +
+        '<svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>' +
+      '</button>' +
+    '</div>' +
+    '<div class="px-6 py-4">' + bodyHtml + '</div>' +
+    (footerHtml ? '<div class="px-6 py-4 border-t border-slate-100 flex justify-end gap-3">' + footerHtml + '</div>' : '');
+  overlay.classList.remove('hidden');
+  overlay.classList.add('flex');
+}
+
+function closeModal() {
+  var overlay = document.getElementById('modal-overlay');
+  overlay.classList.add('hidden');
+  overlay.classList.remove('flex');
+}
+
+function showConfirm(title, message, onConfirm) {
+  showModal(title, '<p class="text-slate-600 text-sm">' + message + '</p>',
+    '<button onclick="closeModal()" class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">Cancel</button>' +
+    '<button id="confirm-btn" class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors">Delete</button>'
+  );
+  document.getElementById('confirm-btn').onclick = function() { closeModal(); onConfirm(); };
+}
+
+// ==================== ROUTER ====================
+function navigate(path) {
+  if (path === state.currentRoute) return;
+  history.pushState(null, '', path);
+  state.currentRoute = path;
+  render();
+}
+
+window.addEventListener('popstate', function() {
+  state.currentRoute = location.pathname;
+  render();
+});
+
+document.addEventListener('click', function(e) {
+  var link = e.target.closest('a[data-route]');
+  if (link) {
+    e.preventDefault();
+    navigate(link.getAttribute('data-route') || link.getAttribute('href'));
+  }
+});
+
+document.getElementById('modal-overlay').addEventListener('click', function(e) {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+// ==================== SSE ====================
+var sseRetryDelay = 2000;
+function connectSSE() {
+  var sse = new EventSource('/api/sse');
+  sse.addEventListener('change', function(e) {
+    try {
+      var event = JSON.parse(e.data);
+      if (event.table) {
+        loadAllData(true);
+        showToast('Real-time update: ' + event.table, 'info');
+      }
+    } catch (err) {}
+    sseRetryDelay = 2000;
+  });
+  sse.onopen = function() {
+    sseRetryDelay = 2000;
+    var ind = document.getElementById('sse-indicator');
+    var status = document.getElementById('sse-status');
+    if (ind) ind.className = 'w-2 h-2 rounded-full bg-emerald-400';
+    if (status) status.textContent = 'Live';
+  };
+  sse.onerror = function() {
+    sse.close();
+    var ind = document.getElementById('sse-indicator');
+    var status = document.getElementById('sse-status');
+    if (ind) ind.className = 'w-2 h-2 rounded-full bg-red-400';
+    if (status) status.textContent = 'Reconnecting...';
+    setTimeout(connectSSE, sseRetryDelay);
+    sseRetryDelay = Math.min(sseRetryDelay * 2, 30000);
+  };
+}
+connectSSE();
+
+// ==================== HELPERS ====================
+function esc(str) { var d = document.createElement('div'); d.textContent = str || ''; return d.innerHTML; }
+function fmtNum(n) { return (n || 0).toLocaleString(); }
+function fmtCurrency(n) { return '$' + (n || 0).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 }); }
+function fmtPct(n) { return (n || 0).toFixed(1) + '%'; }
+function pct(val, max) { return max > 0 ? Math.round((val / max) * 100) : 0; }
+
+function initials(name) {
+  if (!name) return '??';
+  var parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  return parts[0].slice(0, 2).toUpperCase();
+}
+
+var avatarColors = [
+  'from-indigo-500 to-purple-500', 'from-emerald-500 to-teal-500', 'from-amber-500 to-orange-500',
+  'from-pink-500 to-rose-500', 'from-cyan-500 to-blue-500', 'from-violet-500 to-fuchsia-500',
+  'from-lime-500 to-green-500', 'from-red-500 to-pink-500',
+];
+function avatarGradient(name) {
+  var hash = 0;
+  for (var i = 0; i < (name || '').length; i++) hash = ((hash << 5) - hash) + name.charCodeAt(i);
+  return avatarColors[Math.abs(hash) % avatarColors.length];
+}
+
+function utilizationColor(pctVal) {
+  if (pctVal >= 95) return 'bg-red-500';
+  if (pctVal >= 85) return 'bg-amber-500';
+  if (pctVal >= 70) return 'bg-emerald-500';
+  if (pctVal >= 50) return 'bg-blue-500';
+  return 'bg-slate-300';
+}
+
+function utilizationTextColor(pctVal) {
+  if (pctVal >= 95) return 'text-red-600';
+  if (pctVal >= 85) return 'text-amber-600';
+  if (pctVal >= 70) return 'text-emerald-600';
+  return 'text-slate-500';
+}
+
+function statusBadge(status) {
+  var s = (status || '').toLowerCase();
+  if (s === 'active') return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-700">Active</span>';
+  if (s === 'planned') return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-100 text-blue-700">Planned</span>';
+  if (s === 'completed') return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600">Completed</span>';
+  if (s === 'on_hold') return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-700">On Hold</span>';
+  return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600">' + esc(status || 'N/A') + '</span>';
+}
+
+function memberName(memberId) {
+  for (var i = 0; i < state.teamMembers.length; i++) {
+    if (state.teamMembers[i].id === memberId) return state.teamMembers[i].name;
+  }
+  return 'Unknown';
+}
+
+function projectName(projectId) {
+  for (var i = 0; i < state.projects.length; i++) {
+    if (state.projects[i].id === projectId) return state.projects[i].name;
+  }
+  return 'Unknown';
+}
+
+function projectColor(projectId) {
+  for (var i = 0; i < state.projects.length; i++) {
+    if (state.projects[i].id === projectId) return state.projects[i].color || '#6366F1';
+  }
+  return '#6366F1';
+}
+
+function getMemberById(id) {
+  for (var i = 0; i < state.teamMembers.length; i++) {
+    if (state.teamMembers[i].id === id) return state.teamMembers[i];
+  }
+  return null;
+}
+
+function getProjectById(id) {
+  for (var i = 0; i < state.projects.length; i++) {
+    if (state.projects[i].id === id) return state.projects[i];
+  }
+  return null;
+}
+
+function getMonths() {
+  var months = {};
+  for (var i = 0; i < state.allocations.length; i++) {
+    if (state.allocations[i].period_month) months[state.allocations[i].period_month] = true;
+  }
+  return Object.keys(months).sort().reverse();
+}
+
+// ==================== RENDER ====================
+function render() {
+  state.currentRoute = location.pathname;
+  var links = document.querySelectorAll('[data-route]');
+  for (var i = 0; i < links.length; i++) {
+    var r = links[i].getAttribute('data-route');
+    if (r === state.currentRoute) {
+      links[i].classList.add('active');
+    } else {
+      links[i].classList.remove('active');
+    }
+  }
+  renderCurrentView();
+}
+
+function renderCurrentView() {
+  var app = document.getElementById('app');
+  if (state.loading) {
+    app.innerHTML = '<div class="flex items-center justify-center h-64"><div class="flex items-center gap-3 text-slate-400 text-sm"><svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>Loading data...</div></div>';
+    return;
+  }
+  var route = state.currentRoute;
+  if (route === '/') renderDashboard(app);
+  else if (route === '/team') renderTeam(app);
+  else if (route === '/projects') renderProjects(app);
+  else if (route === '/allocations') renderAllocations(app);
+  else if (route === '/reports') renderReports(app);
+  else renderDashboard(app);
+}
+
+// ==================== DASHBOARD ====================
+function renderDashboard(el) {
+  var members = state.teamMembers;
+  var projects = state.projects;
+  var allocs = state.allocations;
+  var currentMonth = new Date().toISOString().slice(0, 7);
+
+  // Filter allocs for current month
+  var monthAllocs = [];
+  for (var i = 0; i < allocs.length; i++) {
+    if (allocs[i].period_month === currentMonth) monthAllocs.push(allocs[i]);
+  }
+
+  var totalCapacity = 0;
+  for (var i = 0; i < members.length; i++) totalCapacity += (parseFloat(members[i].monthly_capacity) || 0);
+
+  var totalPlanned = 0, totalActual = 0;
+  for (var i = 0; i < monthAllocs.length; i++) {
+    totalPlanned += (parseFloat(monthAllocs[i].planned_hours) || 0);
+    totalActual += (parseFloat(monthAllocs[i].actual_hours) || 0);
+  }
+
+  var utilPct = totalCapacity > 0 ? (totalPlanned / totalCapacity * 100) : 0;
+  var activeProjects = 0;
+  for (var i = 0; i < projects.length; i++) {
+    if ((projects[i].status || '').toLowerCase() === 'active') activeProjects++;
+  }
+
+  // Revenue estimate
+  var totalRevenue = 0;
+  for (var i = 0; i < monthAllocs.length; i++) {
+    var proj = getProjectById(monthAllocs[i].project_id);
+    if (proj && parseFloat(proj.blended_rate) > 0) {
+      totalRevenue += (parseFloat(monthAllocs[i].planned_hours) || 0) * parseFloat(proj.blended_rate);
+    }
+  }
+
+  // Per-member utilization for current month
+  var memberUtils = [];
+  for (var i = 0; i < members.length; i++) {
+    var m = members[i];
+    var planned = 0;
+    for (var j = 0; j < monthAllocs.length; j++) {
+      if (monthAllocs[j].member_id === m.id) {
+        planned += (parseFloat(monthAllocs[j].planned_hours) || 0);
+      }
+    }
+    var cap = parseFloat(m.monthly_capacity) || 160;
+    memberUtils.push({ name: m.name, planned: planned, capacity: cap, utilization: cap > 0 ? (planned / cap * 100) : 0 });
+  }
+  memberUtils.sort(function(a, b) { return b.utilization - a.utilization; });
+
+  // Active projects with hours
+  var projectHours = [];
+  for (var i = 0; i < projects.length; i++) {
+    if ((projects[i].status || '').toLowerCase() !== 'active') continue;
+    var p = projects[i];
+    var phrs = 0, ahrs = 0;
+    for (var j = 0; j < monthAllocs.length; j++) {
+      if (monthAllocs[j].project_id === p.id) {
+        phrs += (parseFloat(monthAllocs[j].planned_hours) || 0);
+        ahrs += (parseFloat(monthAllocs[j].actual_hours) || 0);
+      }
+    }
+    projectHours.push({ name: p.name, color: p.color || '#6366F1', planned: phrs, actual: ahrs, budget: parseFloat(p.budget_hours) || 0, client: p.client_name });
+  }
+
+  var kpiHtml = '';
+  // KPI Cards
+  kpiHtml += '<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">';
+
+  kpiHtml += '<div class="card bg-white rounded-xl p-5 border border-slate-200 shadow-sm">' +
+    '<div class="flex items-center justify-between mb-3">' +
+      '<span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Team Size</span>' +
+      '<div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center"><svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg></div>' +
+    '</div>' +
+    '<div class="text-2xl font-bold text-slate-900">' + members.length + '</div>' +
+    '<div class="text-xs text-slate-400 mt-1">' + fmtNum(totalCapacity) + ' hrs capacity</div>' +
+  '</div>';
+
+  kpiHtml += '<div class="card bg-white rounded-xl p-5 border border-slate-200 shadow-sm">' +
+    '<div class="flex items-center justify-between mb-3">' +
+      '<span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Planned Hours</span>' +
+      '<div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center"><svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>' +
+    '</div>' +
+    '<div class="text-2xl font-bold text-slate-900">' + fmtNum(totalPlanned) + '</div>' +
+    '<div class="text-xs text-slate-400 mt-1">this month (' + currentMonth + ')</div>' +
+  '</div>';
+
+  kpiHtml += '<div class="card bg-white rounded-xl p-5 border border-slate-200 shadow-sm">' +
+    '<div class="flex items-center justify-between mb-3">' +
+      '<span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Actual Hours</span>' +
+      '<div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center"><svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>' +
+    '</div>' +
+    '<div class="text-2xl font-bold text-slate-900">' + fmtNum(totalActual) + '</div>' +
+    '<div class="text-xs ' + (totalActual > totalPlanned ? 'text-red-500' : 'text-slate-400') + ' mt-1">' + (totalActual > totalPlanned ? '+' : '') + fmtNum(totalActual - totalPlanned) + ' variance</div>' +
+  '</div>';
+
+  kpiHtml += '<div class="card bg-white rounded-xl p-5 border border-slate-200 shadow-sm">' +
+    '<div class="flex items-center justify-between mb-3">' +
+      '<span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Utilization</span>' +
+      '<div class="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center"><svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg></div>' +
+    '</div>' +
+    '<div class="text-2xl font-bold ' + utilizationTextColor(utilPct) + '">' + fmtPct(utilPct) + '</div>' +
+    '<div class="w-full bg-slate-100 rounded-full h-1.5 mt-2"><div class="h-1.5 rounded-full gauge-bar ' + utilizationColor(utilPct) + '" style="width: ' + Math.min(utilPct, 100) + '%"></div></div>' +
+  '</div>';
+
+  kpiHtml += '<div class="card bg-white rounded-xl p-5 border border-slate-200 shadow-sm">' +
+    '<div class="flex items-center justify-between mb-3">' +
+      '<span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Active Projects</span>' +
+      '<div class="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center"><svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg></div>' +
+    '</div>' +
+    '<div class="text-2xl font-bold text-slate-900">' + activeProjects + '</div>' +
+    '<div class="text-xs text-slate-400 mt-1">of ' + projects.length + ' total</div>' +
+  '</div>';
+
+  kpiHtml += '</div>';
+
+  // Team utilization + Project hours
+  var teamUtilHtml = '';
+  for (var i = 0; i < memberUtils.length; i++) {
+    var mu = memberUtils[i];
+    teamUtilHtml += '<div class="flex items-center gap-3 rounded-lg p-2 -mx-2 hover:bg-slate-50 transition-colors">' +
+      '<div class="w-24 text-xs font-medium text-slate-700 truncate">' + esc(mu.name) + '</div>' +
+      '<div class="flex-1 bg-slate-100 rounded-full h-5 relative overflow-hidden">' +
+        '<div class="h-full rounded-full gauge-bar ' + utilizationColor(mu.utilization) + ' opacity-90" style="width: ' + Math.min(mu.utilization, 100) + '%"></div>' +
+        '<div class="absolute inset-0 flex items-center justify-center text-[10px] font-bold ' + (mu.utilization > 50 ? 'text-white' : 'text-slate-600') + '">' + fmtPct(mu.utilization) + '</div>' +
+      '</div>' +
+      '<div class="w-16 text-right text-[10px] text-slate-400">' + fmtNum(mu.planned) + 'h</div>' +
+    '</div>';
+  }
+
+  var projCardsHtml = '';
+  for (var i = 0; i < projectHours.length; i++) {
+    var ph = projectHours[i];
+    var budgetPct = ph.budget > 0 ? (ph.planned / ph.budget * 100) : 0;
+    projCardsHtml += '<div class="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">' +
+      '<div class="w-2 h-8 rounded-full" style="background: ' + ph.color + '"></div>' +
+      '<div class="flex-1 min-w-0">' +
+        '<div class="text-xs font-medium text-slate-900 truncate">' + esc(ph.name) + '</div>' +
+        '<div class="text-[10px] text-slate-400">' + (ph.client ? esc(ph.client) : 'Internal') + '</div>' +
+      '</div>' +
+      '<div class="text-right">' +
+        '<div class="text-xs font-semibold text-slate-900">' + fmtNum(ph.planned) + 'h</div>' +
+        (ph.budget > 0 ? '<div class="text-[10px] ' + (budgetPct > 90 ? 'text-red-500' : 'text-slate-400') + '">' + fmtPct(budgetPct) + ' of budget</div>' : '') +
+      '</div>' +
+    '</div>';
+  }
+
+  el.innerHTML = '<div class="fade-in">' +
+    '<div class="mb-6">' +
+      '<h2 class="text-2xl font-bold text-slate-900">Dashboard</h2>' +
+      '<p class="text-sm text-slate-500 mt-1">Resource management overview for ' + currentMonth + '</p>' +
+    '</div>' +
+    kpiHtml +
+    '<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">' +
+      '<div class="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm">' +
+        '<div class="px-5 py-4 border-b border-slate-100"><h3 class="font-semibold text-slate-900 text-sm">Team Utilization</h3></div>' +
+        '<div class="p-5 space-y-2">' + (teamUtilHtml || '<p class="text-sm text-slate-400">No allocation data for this month</p>') + '</div>' +
+      '</div>' +
+      '<div class="bg-white rounded-xl border border-slate-200 shadow-sm">' +
+        '<div class="px-5 py-4 border-b border-slate-100"><h3 class="font-semibold text-slate-900 text-sm">Active Projects</h3></div>' +
+        '<div class="p-4 space-y-2">' + (projCardsHtml || '<p class="text-sm text-slate-400 p-2">No active projects</p>') + '</div>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+// ==================== TEAM ====================
+function renderTeam(el) {
+  var members = state.teamMembers;
+  var currentMonth = new Date().toISOString().slice(0, 7);
+
+  var cardsHtml = '';
+  for (var i = 0; i < members.length; i++) {
+    var m = members[i];
+    var planned = 0;
+    var projMap = {};
+    for (var j = 0; j < state.allocations.length; j++) {
+      var a = state.allocations[j];
+      if (a.member_id === m.id && a.period_month === currentMonth) {
+        planned += (parseFloat(a.planned_hours) || 0);
+        var pn = projectName(a.project_id);
+        projMap[pn] = (projMap[pn] || 0) + (parseFloat(a.planned_hours) || 0);
+      }
+    }
+    var cap = parseFloat(m.monthly_capacity) || 160;
+    var util = cap > 0 ? (planned / cap * 100) : 0;
+
+    var projEntries = [];
+    var projKeys = Object.keys(projMap);
+    for (var k = 0; k < projKeys.length; k++) projEntries.push([projKeys[k], projMap[projKeys[k]]]);
+    projEntries.sort(function(a, b) { return b[1] - a[1]; });
+
+    var projHtml = '';
+    if (projEntries.length > 0) {
+      projHtml = '<div class="border-t border-slate-100 pt-3 mt-3"><p class="text-[10px] font-medium text-slate-500 uppercase tracking-wider mb-2">Projects</p><div class="space-y-1.5">';
+      var limit = Math.min(projEntries.length, 4);
+      for (var k = 0; k < limit; k++) {
+        projHtml += '<div class="flex items-center justify-between"><span class="text-xs text-slate-600 truncate mr-2">' + esc(projEntries[k][0]) + '</span><span class="text-xs font-medium text-slate-900">' + fmtNum(projEntries[k][1]) + 'h</span></div>';
+      }
+      if (projEntries.length > 4) projHtml += '<span class="text-[10px] text-slate-400">+' + (projEntries.length - 4) + ' more</span>';
+      projHtml += '</div></div>';
+    }
+
+    cardsHtml += '<div class="card bg-white rounded-xl border border-slate-200 shadow-sm p-5">' +
+      '<div class="flex items-start justify-between mb-4">' +
+        '<div class="flex items-center gap-3">' +
+          '<div class="w-10 h-10 rounded-xl bg-gradient-to-br ' + avatarGradient(m.name) + ' flex items-center justify-center text-white font-bold text-xs shadow-sm">' + initials(m.name) + '</div>' +
+          '<div><h4 class="font-semibold text-slate-900 text-sm">' + esc(m.name) + '</h4><p class="text-xs text-slate-500">' + esc(m.role || 'Team Member') + '</p></div>' +
+        '</div>' +
+        '<div class="flex items-center gap-1">' +
+          '<button onclick="showEditMemberModal(\'' + m.id + '\')" class="p-1.5 rounded-lg hover:bg-slate-100 transition-colors" title="Edit"><svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>' +
+          '<button onclick="deleteMember(\'' + m.id + '\', \'' + esc(m.name) + '\')" class="p-1.5 rounded-lg hover:bg-red-50 transition-colors" title="Delete"><svg class="w-4 h-4 text-slate-400 hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="flex items-center gap-2 mb-3 text-[10px]">' +
+        '<span class="inline-flex items-center px-2 py-0.5 rounded-full font-semibold bg-indigo-50 text-indigo-700">' + esc(m.department || 'General') + '</span>' +
+        '<span class="text-slate-400">' + fmtCurrency(m.hourly_rate || 0) + '/hr</span>' +
+      '</div>' +
+      '<div class="mb-3">' +
+        '<div class="flex items-center justify-between text-xs mb-1"><span class="text-slate-500">Utilization</span><span class="font-semibold ' + utilizationTextColor(util) + '">' + fmtPct(util) + '</span></div>' +
+        '<div class="w-full bg-slate-100 rounded-full h-2"><div class="h-2 rounded-full gauge-bar ' + utilizationColor(util) + '" style="width: ' + Math.min(util, 100) + '%"></div></div>' +
+        '<div class="flex justify-between text-[10px] text-slate-400 mt-1"><span>' + fmtNum(planned) + 'h planned</span><span>' + fmtNum(cap) + 'h capacity</span></div>' +
+      '</div>' +
+      projHtml +
+    '</div>';
+  }
+
+  el.innerHTML = '<div class="fade-in">' +
+    '<div class="flex items-center justify-between mb-6">' +
+      '<div><h2 class="text-2xl font-bold text-slate-900">Team</h2><p class="text-sm text-slate-500 mt-1">' + members.length + ' team members</p></div>' +
+      '<button onclick="showAddMemberModal()" class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-xl transition-colors shadow-sm shadow-indigo-600/20">' +
+        '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>Add Member</button>' +
+    '</div>' +
+    '<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">' + cardsHtml + '</div>' +
+  '</div>';
+}
+
+function memberFormHtml(member) {
+  var m = member || {};
+  return '<div class="space-y-4">' +
+    '<div class="grid grid-cols-2 gap-4">' +
+      '<div><label class="block text-xs font-medium text-slate-600 mb-1">Name *</label><input id="mf-name" type="text" value="' + esc(m.name || '') + '" required class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500"></div>' +
+      '<div><label class="block text-xs font-medium text-slate-600 mb-1">Email *</label><input id="mf-email" type="email" value="' + esc(m.email || '') + '" required class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500"></div>' +
+    '</div>' +
+    '<div class="grid grid-cols-2 gap-4">' +
+      '<div><label class="block text-xs font-medium text-slate-600 mb-1">Role</label><input id="mf-role" type="text" value="' + esc(m.role || '') + '" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500"></div>' +
+      '<div><label class="block text-xs font-medium text-slate-600 mb-1">Department</label><input id="mf-department" type="text" value="' + esc(m.department || '') + '" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500"></div>' +
+    '</div>' +
+    '<div class="grid grid-cols-2 gap-4">' +
+      '<div><label class="block text-xs font-medium text-slate-600 mb-1">Monthly Capacity (hrs)</label><input id="mf-capacity" type="number" value="' + (m.monthly_capacity || 160) + '" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500"></div>' +
+      '<div><label class="block text-xs font-medium text-slate-600 mb-1">Hourly Rate ($)</label><input id="mf-rate" type="number" value="' + (m.hourly_rate || 0) + '" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500"></div>' +
+    '</div>' +
+  '</div>';
+}
+
+function showAddMemberModal() {
+  showModal('Add Team Member', memberFormHtml(),
+    '<button onclick="closeModal()" class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">Cancel</button>' +
+    '<button onclick="saveMember()" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors">Add Member</button>'
+  );
+}
+
+function showEditMemberModal(id) {
+  var member = getMemberById(id);
+  if (!member) return;
+  showModal('Edit Team Member', memberFormHtml(member),
+    '<button onclick="closeModal()" class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">Cancel</button>' +
+    '<button onclick="updateMember(\'' + id + '\')" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors">Save Changes</button>'
+  );
+}
+
+async function saveMember() {
+  var name = document.getElementById('mf-name').value.trim();
+  var email = document.getElementById('mf-email').value.trim();
+  if (!name || !email) { showToast('Name and email are required', 'warning'); return; }
+  try {
+    await api('team_members', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: name,
+        email: email,
+        role: document.getElementById('mf-role').value.trim() || null,
+        department: document.getElementById('mf-department').value.trim() || null,
+        monthly_capacity: parseInt(document.getElementById('mf-capacity').value) || 160,
+        hourly_rate: parseInt(document.getElementById('mf-rate').value) || 0,
+        is_active: true,
+      }),
+    });
+    closeModal();
+    showToast('Team member added', 'success');
+    await loadAllData(true);
+  } catch (e) { /* toast already shown */ }
+}
+
+async function updateMember(id) {
+  var name = document.getElementById('mf-name').value.trim();
+  var email = document.getElementById('mf-email').value.trim();
+  if (!name || !email) { showToast('Name and email are required', 'warning'); return; }
+  try {
+    await api('team_members/' + id, {
+      method: 'PUT',
+      body: JSON.stringify({
+        name: name,
+        email: email,
+        role: document.getElementById('mf-role').value.trim() || null,
+        department: document.getElementById('mf-department').value.trim() || null,
+        monthly_capacity: parseInt(document.getElementById('mf-capacity').value) || 160,
+        hourly_rate: parseInt(document.getElementById('mf-rate').value) || 0,
+      }),
+    });
+    closeModal();
+    showToast('Team member updated', 'success');
+    await loadAllData(true);
+  } catch (e) { /* toast already shown */ }
+}
+
+async function deleteMember(id, name) {
+  showConfirm('Delete Team Member', 'Are you sure you want to remove <strong>' + esc(name) + '</strong> from the team? This action cannot be undone.', async function() {
+    try {
+      await api('team_members/' + id, { method: 'DELETE' });
+      showToast('Team member removed', 'success');
+      await loadAllData(true);
+    } catch (e) { /* toast already shown */ }
+  });
+}
+
+// ==================== PROJECTS ====================
+function renderProjects(el) {
+  var projects = state.projects;
+  var currentMonth = new Date().toISOString().slice(0, 7);
+
+  var cardsHtml = '';
+  for (var i = 0; i < projects.length; i++) {
+    var p = projects[i];
+    var totalPlanned = 0, totalActual = 0, memberSet = {};
+    for (var j = 0; j < state.allocations.length; j++) {
+      var a = state.allocations[j];
+      if (a.project_id === p.id && a.period_month === currentMonth) {
+        totalPlanned += (parseFloat(a.planned_hours) || 0);
+        totalActual += (parseFloat(a.actual_hours) || 0);
+        memberSet[a.member_id] = true;
+      }
+    }
+    var memberCount = Object.keys(memberSet).length;
+    var budgetPct = (parseFloat(p.budget_hours) || 0) > 0 ? (totalPlanned / parseFloat(p.budget_hours) * 100) : 0;
+    var revenue = (parseFloat(p.blended_rate) || 0) > 0 ? totalPlanned * parseFloat(p.blended_rate) : 0;
+
+    cardsHtml += '<div class="card bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">' +
+      '<div class="h-1.5" style="background: ' + (p.color || '#6366F1') + '"></div>' +
+      '<div class="p-5">' +
+        '<div class="flex items-start justify-between mb-3">' +
+          '<div>' +
+            '<h4 class="font-semibold text-slate-900 text-sm">' + esc(p.name) + '</h4>' +
+            '<p class="text-xs text-slate-500 mt-0.5">' + (p.client_name ? esc(p.client_name) : 'Internal Project') + '</p>' +
+          '</div>' +
+          '<div class="flex items-center gap-1">' +
+            '<button onclick="showEditProjectModal(\'' + p.id + '\')" class="p-1.5 rounded-lg hover:bg-slate-100 transition-colors" title="Edit"><svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg></button>' +
+            '<button onclick="deleteProject(\'' + p.id + '\', \'' + esc(p.name) + '\')" class="p-1.5 rounded-lg hover:bg-red-50 transition-colors" title="Delete"><svg class="w-4 h-4 text-slate-400 hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="flex items-center gap-2 mb-4">' +
+          statusBadge(p.status) +
+          '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600">' + esc(p.project_type || 'general') + '</span>' +
+        '</div>' +
+        '<div class="grid grid-cols-3 gap-3 text-center mb-4">' +
+          '<div class="bg-slate-50 rounded-lg p-2"><div class="text-xs font-bold text-slate-900">' + fmtNum(totalPlanned) + '</div><div class="text-[10px] text-slate-400">Planned hrs</div></div>' +
+          '<div class="bg-slate-50 rounded-lg p-2"><div class="text-xs font-bold text-slate-900">' + fmtNum(totalActual) + '</div><div class="text-[10px] text-slate-400">Actual hrs</div></div>' +
+          '<div class="bg-slate-50 rounded-lg p-2"><div class="text-xs font-bold text-slate-900">' + memberCount + '</div><div class="text-[10px] text-slate-400">Members</div></div>' +
+        '</div>' +
+        (parseFloat(p.budget_hours) > 0 ? '<div class="mb-3"><div class="flex items-center justify-between text-xs mb-1"><span class="text-slate-500">Budget</span><span class="font-semibold ' + (budgetPct > 90 ? 'text-red-600' : 'text-slate-700') + '">' + fmtPct(budgetPct) + '</span></div><div class="w-full bg-slate-100 rounded-full h-1.5"><div class="h-1.5 rounded-full gauge-bar ' + (budgetPct > 90 ? 'bg-red-500' : budgetPct > 70 ? 'bg-amber-500' : 'bg-indigo-500') + '" style="width: ' + Math.min(budgetPct, 100) + '%"></div></div><div class="text-[10px] text-slate-400 mt-1">' + fmtNum(totalPlanned) + ' of ' + fmtNum(parseFloat(p.budget_hours)) + ' hrs</div></div>' : '') +
+        (revenue > 0 ? '<div class="flex items-center justify-between text-xs"><span class="text-slate-500">Revenue</span><span class="font-semibold text-emerald-600">' + fmtCurrency(revenue) + '</span></div>' : '') +
+        '<div class="flex items-center justify-between text-xs text-slate-400 mt-2">' +
+          '<span>' + (p.start_date || '').slice(0, 10) + '</span>' +
+          '<span>' + (p.end_date || '').slice(0, 10) + '</span>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  el.innerHTML = '<div class="fade-in">' +
+    '<div class="flex items-center justify-between mb-6">' +
+      '<div><h2 class="text-2xl font-bold text-slate-900">Projects</h2><p class="text-sm text-slate-500 mt-1">' + projects.length + ' projects</p></div>' +
+      '<button onclick="showAddProjectModal()" class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-xl transition-colors shadow-sm shadow-indigo-600/20">' +
+        '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>Add Project</button>' +
+    '</div>' +
+    '<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">' + cardsHtml + '</div>' +
+  '</div>';
+}
+
+function projectFormHtml(project) {
+  var p = project || {};
+  var colors = ['#6366F1', '#7C3AED', '#EC4899', '#F59E0B', '#10B981', '#3B82F6', '#EF4444', '#8B5CF6'];
+  var colorOpts = '';
+  for (var i = 0; i < colors.length; i++) {
+    colorOpts += '<div onclick="document.getElementById(\'pf-color\').value=\'' + colors[i] + '\';var dots=this.parentNode.querySelectorAll(\'div\');for(var k=0;k<dots.length;k++)dots[k].classList.remove(\'ring-2\',\'ring-offset-2\',\'ring-indigo-500\');this.classList.add(\'ring-2\',\'ring-offset-2\',\'ring-indigo-500\')" class="w-6 h-6 rounded-full cursor-pointer ' + ((p.color || '#6366F1') === colors[i] ? 'ring-2 ring-offset-2 ring-indigo-500' : '') + '" style="background: ' + colors[i] + '"></div>';
+  }
+  return '<div class="space-y-4">' +
+    '<div><label class="block text-xs font-medium text-slate-600 mb-1">Project Name *</label><input id="pf-name" type="text" value="' + esc(p.name || '') + '" required class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500"></div>' +
+    '<div class="grid grid-cols-2 gap-4">' +
+      '<div><label class="block text-xs font-medium text-slate-600 mb-1">Client Name</label><input id="pf-client" type="text" value="' + esc(p.client_name || '') + '" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500"></div>' +
+      '<div><label class="block text-xs font-medium text-slate-600 mb-1">Type</label><select id="pf-type" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500"><option value="internal"' + ((p.project_type || '') === 'internal' ? ' selected' : '') + '>Internal</option><option value="external"' + ((p.project_type || '') === 'external' ? ' selected' : '') + '>External</option></select></div>' +
+    '</div>' +
+    '<div class="grid grid-cols-2 gap-4">' +
+      '<div><label class="block text-xs font-medium text-slate-600 mb-1">Status</label><select id="pf-status" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500"><option value="active"' + ((p.status || '') === 'active' ? ' selected' : '') + '>Active</option><option value="planned"' + ((p.status || '') === 'planned' ? ' selected' : '') + '>Planned</option><option value="completed"' + ((p.status || '') === 'completed' ? ' selected' : '') + '>Completed</option><option value="on_hold"' + ((p.status || '') === 'on_hold' ? ' selected' : '') + '>On Hold</option></select></div>' +
+      '<div><label class="block text-xs font-medium text-slate-600 mb-1">Budget Hours</label><input id="pf-budget" type="number" value="' + (p.budget_hours || 0) + '" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500"></div>' +
+    '</div>' +
+    '<div class="grid grid-cols-2 gap-4">' +
+      '<div><label class="block text-xs font-medium text-slate-600 mb-1">Start Date</label><input id="pf-start" type="date" value="' + (p.start_date || '').slice(0, 10) + '" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500"></div>' +
+      '<div><label class="block text-xs font-medium text-slate-600 mb-1">End Date</label><input id="pf-end" type="date" value="' + (p.end_date || '').slice(0, 10) + '" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500"></div>' +
+    '</div>' +
+    '<div><label class="block text-xs font-medium text-slate-600 mb-1">Blended Rate ($/hr)</label><input id="pf-rate" type="number" value="' + (p.blended_rate || 0) + '" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500"></div>' +
+    '<div><label class="block text-xs font-medium text-slate-600 mb-2">Color</label><input type="hidden" id="pf-color" value="' + (p.color || '#6366F1') + '"><div class="flex gap-2">' + colorOpts + '</div></div>' +
+  '</div>';
+}
+
+function showAddProjectModal() {
+  showModal('Add Project', projectFormHtml(),
+    '<button onclick="closeModal()" class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">Cancel</button>' +
+    '<button onclick="saveProject()" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors">Add Project</button>'
+  );
+}
+
+function showEditProjectModal(id) {
+  var project = getProjectById(id);
+  if (!project) return;
+  showModal('Edit Project', projectFormHtml(project),
+    '<button onclick="closeModal()" class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">Cancel</button>' +
+    '<button onclick="updateProject(\'' + id + '\')" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors">Save Changes</button>'
+  );
+}
+
+function getProjectFormData() {
+  var name = document.getElementById('pf-name').value.trim();
+  if (!name) { showToast('Project name is required', 'warning'); return null; }
+  return {
+    name: name,
+    client_name: document.getElementById('pf-client').value.trim() || null,
+    project_type: document.getElementById('pf-type').value,
+    status: document.getElementById('pf-status').value,
+    budget_hours: parseInt(document.getElementById('pf-budget').value) || 0,
+    blended_rate: parseInt(document.getElementById('pf-rate').value) || 0,
+    start_date: document.getElementById('pf-start').value || null,
+    end_date: document.getElementById('pf-end').value || null,
+    color: document.getElementById('pf-color').value || '#6366F1',
+  };
+}
+
+async function saveProject() {
+  var data = getProjectFormData();
+  if (!data) return;
+  try {
+    await api('rh_projects', { method: 'POST', body: JSON.stringify(data) });
+    closeModal();
+    showToast('Project added', 'success');
+    await loadAllData(true);
+  } catch (e) { /* toast already shown */ }
+}
+
+async function updateProject(id) {
+  var data = getProjectFormData();
+  if (!data) return;
+  try {
+    await api('rh_projects/' + id, { method: 'PUT', body: JSON.stringify(data) });
+    closeModal();
+    showToast('Project updated', 'success');
+    await loadAllData(true);
+  } catch (e) { /* toast already shown */ }
+}
+
+async function deleteProject(id, name) {
+  showConfirm('Delete Project', 'Are you sure you want to delete <strong>' + esc(name) + '</strong>? All related allocations may be affected.', async function() {
+    try {
+      await api('rh_projects/' + id, { method: 'DELETE' });
+      showToast('Project deleted', 'success');
+      await loadAllData(true);
+    } catch (e) { /* toast already shown */ }
+  });
+}
+
+// ==================== ALLOCATIONS ====================
+function renderAllocations(el) {
+  var months = getMonths();
+  if (months.indexOf(state.allocMonth) === -1 && months.length > 0) {
+    state.allocMonth = months[0];
+  }
+
+  // Filter allocations for selected month
+  var monthAllocs = [];
+  for (var i = 0; i < state.allocations.length; i++) {
+    if (state.allocations[i].period_month === state.allocMonth) {
+      monthAllocs.push(state.allocations[i]);
+    }
+  }
+
+  // Build matrix: members as rows, projects as columns
+  var members = state.teamMembers;
+  var projects = state.projects;
+
+  // Build lookup: memberId_projectId -> allocation
+  var allocMap = {};
+  for (var i = 0; i < monthAllocs.length; i++) {
+    var a = monthAllocs[i];
+    allocMap[a.member_id + '_' + a.project_id] = a;
+  }
+
+  var monthOptions = '';
+  for (var i = 0; i < months.length; i++) {
+    monthOptions += '<option value="' + months[i] + '"' + (months[i] === state.allocMonth ? ' selected' : '') + '>' + months[i] + '</option>';
+  }
+
+  // Table header
+  var headerHtml = '<th class="px-4 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider sticky left-0 bg-white z-10 min-w-[140px]">Member</th>';
+  for (var j = 0; j < projects.length; j++) {
+    headerHtml += '<th class="px-3 py-3 text-center text-xs font-semibold text-slate-500 uppercase tracking-wider min-w-[120px]"><div class="flex items-center justify-center gap-1"><div class="w-2 h-2 rounded-full" style="background: ' + (projects[j].color || '#6366F1') + '"></div><span class="truncate">' + esc(projects[j].name).substring(0, 15) + '</span></div></th>';
+  }
+  headerHtml += '<th class="px-3 py-3 text-center text-xs font-semibold text-indigo-600 uppercase tracking-wider min-w-[80px]">Total</th>';
+
+  // Table rows
+  var bodyHtml = '';
+  for (var i = 0; i < members.length; i++) {
+    var m = members[i];
+    var rowTotal = 0;
+    var cellsHtml = '<td class="px-4 py-3 sticky left-0 bg-white z-10">' +
+      '<div class="flex items-center gap-2">' +
+        '<div class="w-7 h-7 rounded-lg bg-gradient-to-br ' + avatarGradient(m.name) + ' flex items-center justify-center text-white font-bold text-[10px]">' + initials(m.name) + '</div>' +
+        '<span class="text-xs font-medium text-slate-900 truncate">' + esc(m.name) + '</span>' +
+      '</div></td>';
+
+    for (var j = 0; j < projects.length; j++) {
+      var key = m.id + '_' + projects[j].id;
+      var alloc = allocMap[key];
+      var planned = alloc ? (parseFloat(alloc.planned_hours) || 0) : 0;
+      var actual = alloc ? (parseFloat(alloc.actual_hours) || 0) : 0;
+      rowTotal += planned;
+
+      if (alloc) {
+        cellsHtml += '<td class="px-2 py-2 text-center">' +
+          '<div class="bg-indigo-50 rounded-lg p-1.5 cursor-pointer hover:bg-indigo-100 transition-colors" onclick="showEditAllocationModal(\'' + alloc.id + '\')">' +
+            '<div class="text-xs font-semibold text-indigo-700">' + planned + 'h</div>' +
+            '<div class="text-[10px] text-slate-400">' + actual + 'h actual</div>' +
+          '</div></td>';
+      } else {
+        cellsHtml += '<td class="px-2 py-2 text-center">' +
+          '<div class="rounded-lg p-1.5 cursor-pointer hover:bg-slate-100 transition-colors group" onclick="showAddAllocationModal(\'' + m.id + '\', \'' + projects[j].id + '\')">' +
+            '<div class="text-[10px] text-slate-300 group-hover:text-indigo-500">+ Add</div>' +
+          '</div></td>';
+      }
+    }
+
+    var cap = parseFloat(m.monthly_capacity) || 160;
+    var rowPct = cap > 0 ? (rowTotal / cap * 100) : 0;
+    cellsHtml += '<td class="px-3 py-3 text-center"><div class="text-xs font-bold ' + utilizationTextColor(rowPct) + '">' + fmtNum(rowTotal) + 'h</div><div class="text-[10px] text-slate-400">' + fmtPct(rowPct) + '</div></td>';
+
+    bodyHtml += '<tr class="border-b border-slate-50 hover:bg-slate-50/50">' + cellsHtml + '</tr>';
+  }
+
+  el.innerHTML = '<div class="fade-in">' +
+    '<div class="flex items-center justify-between mb-6">' +
+      '<div><h2 class="text-2xl font-bold text-slate-900">Allocations</h2><p class="text-sm text-slate-500 mt-1">Team member hours by project</p></div>' +
+      '<div class="flex items-center gap-3">' +
+        '<select id="alloc-month-select" onchange="state.allocMonth=this.value;renderCurrentView()" class="px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500">' + monthOptions + '</select>' +
+        '<button onclick="showAddAllocationModal()" class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-xl transition-colors shadow-sm shadow-indigo-600/20">' +
+          '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>Add</button>' +
+      '</div>' +
+    '</div>' +
+    '<div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-x-auto">' +
+      '<table class="w-full text-sm">' +
+        '<thead><tr class="border-b border-slate-100">' + headerHtml + '</tr></thead>' +
+        '<tbody>' + bodyHtml + '</tbody>' +
+      '</table>' +
+    '</div>' +
+  '</div>';
+}
+
+function allocationFormHtml(alloc, memberId, projectId) {
+  var a = alloc || {};
+  var memberOpts = '';
+  for (var i = 0; i < state.teamMembers.length; i++) {
+    var m = state.teamMembers[i];
+    var sel = (a.member_id === m.id || memberId === m.id) ? ' selected' : '';
+    memberOpts += '<option value="' + m.id + '"' + sel + '>' + esc(m.name) + '</option>';
+  }
+  var projectOpts = '';
+  for (var i = 0; i < state.projects.length; i++) {
+    var p = state.projects[i];
+    var sel = (a.project_id === p.id || projectId === p.id) ? ' selected' : '';
+    projectOpts += '<option value="' + p.id + '"' + sel + '>' + esc(p.name) + '</option>';
+  }
+  return '<div class="space-y-4">' +
+    '<div class="grid grid-cols-2 gap-4">' +
+      '<div><label class="block text-xs font-medium text-slate-600 mb-1">Team Member *</label><select id="af-member" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500">' + memberOpts + '</select></div>' +
+      '<div><label class="block text-xs font-medium text-slate-600 mb-1">Project *</label><select id="af-project" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500">' + projectOpts + '</select></div>' +
+    '</div>' +
+    '<div><label class="block text-xs font-medium text-slate-600 mb-1">Period Month *</label><input id="af-month" type="month" value="' + (a.period_month || state.allocMonth) + '" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500"></div>' +
+    '<div class="grid grid-cols-2 gap-4">' +
+      '<div><label class="block text-xs font-medium text-slate-600 mb-1">Planned Hours</label><input id="af-planned" type="number" value="' + (a.planned_hours || 0) + '" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500"></div>' +
+      '<div><label class="block text-xs font-medium text-slate-600 mb-1">Actual Hours</label><input id="af-actual" type="number" value="' + (a.actual_hours || 0) + '" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500"></div>' +
+    '</div>' +
+    '<div><label class="block text-xs font-medium text-slate-600 mb-1">Notes</label><input id="af-notes" type="text" value="' + esc(a.notes || '') + '" class="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500"></div>' +
+  '</div>';
+}
+
+function showAddAllocationModal(memberId, projectId) {
+  showModal('Add Allocation', allocationFormHtml(null, memberId, projectId),
+    '<button onclick="closeModal()" class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">Cancel</button>' +
+    '<button onclick="saveAllocation()" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors">Add Allocation</button>'
+  );
+}
+
+function showEditAllocationModal(id) {
+  var alloc = null;
+  for (var i = 0; i < state.allocations.length; i++) {
+    if (state.allocations[i].id === id) { alloc = state.allocations[i]; break; }
+  }
+  if (!alloc) return;
+  showModal('Edit Allocation', allocationFormHtml(alloc),
+    '<button onclick="deleteAllocation(\'' + id + '\')" class="px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors mr-auto">Delete</button>' +
+    '<button onclick="closeModal()" class="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">Cancel</button>' +
+    '<button onclick="updateAllocation(\'' + id + '\')" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors">Save</button>'
+  );
+}
+
+function getAllocationFormData() {
+  return {
+    member_id: document.getElementById('af-member').value,
+    project_id: document.getElementById('af-project').value,
+    period_month: document.getElementById('af-month').value,
+    planned_hours: parseInt(document.getElementById('af-planned').value) || 0,
+    actual_hours: parseInt(document.getElementById('af-actual').value) || 0,
+    notes: document.getElementById('af-notes').value.trim() || null,
+  };
+}
+
+async function saveAllocation() {
+  var data = getAllocationFormData();
+  if (!data.member_id || !data.project_id || !data.period_month) { showToast('Member, project, and month are required', 'warning'); return; }
+  try {
+    await api('allocations', { method: 'POST', body: JSON.stringify(data) });
+    closeModal();
+    showToast('Allocation added', 'success');
+    await loadAllData(true);
+  } catch (e) { /* toast already shown */ }
+}
+
+async function updateAllocation(id) {
+  var data = getAllocationFormData();
+  try {
+    await api('allocations/' + id, { method: 'PUT', body: JSON.stringify(data) });
+    closeModal();
+    showToast('Allocation updated', 'success');
+    await loadAllData(true);
+  } catch (e) { /* toast already shown */ }
+}
+
+async function deleteAllocation(id) {
+  try {
+    await api('allocations/' + id, { method: 'DELETE' });
+    closeModal();
+    showToast('Allocation deleted', 'success');
+    await loadAllData(true);
+  } catch (e) { /* toast already shown */ }
+}
+
+// ==================== REPORTS ====================
+function renderReports(el) {
+  var members = state.teamMembers;
+  var projects = state.projects;
+  var allocs = state.allocations;
+  var currentMonth = new Date().toISOString().slice(0, 7);
+
+  // Filter to current month
+  var monthAllocs = [];
+  for (var i = 0; i < allocs.length; i++) {
+    if (allocs[i].period_month === currentMonth) monthAllocs.push(allocs[i]);
+  }
+
+  // --- Utilization by member ---
+  var utilRows = '';
+  var sortedMembers = [];
+  for (var i = 0; i < members.length; i++) {
+    var m = members[i];
+    var planned = 0, actual = 0;
+    for (var j = 0; j < monthAllocs.length; j++) {
+      if (monthAllocs[j].member_id === m.id) {
+        planned += (parseFloat(monthAllocs[j].planned_hours) || 0);
+        actual += (parseFloat(monthAllocs[j].actual_hours) || 0);
+      }
+    }
+    var cap = parseFloat(m.monthly_capacity) || 160;
+    var util = cap > 0 ? (planned / cap * 100) : 0;
+    sortedMembers.push({ name: m.name, role: m.role, planned: planned, actual: actual, capacity: cap, utilization: util, rate: parseFloat(m.hourly_rate) || 0 });
+  }
+  sortedMembers.sort(function(a, b) { return b.utilization - a.utilization; });
+
+  for (var i = 0; i < sortedMembers.length; i++) {
+    var sm = sortedMembers[i];
+    utilRows += '<tr class="border-b border-slate-50 hover:bg-slate-50/50">' +
+      '<td class="px-5 py-3"><div class="flex items-center gap-2"><div class="w-7 h-7 rounded-lg bg-gradient-to-br ' + avatarGradient(sm.name) + ' flex items-center justify-center text-white font-bold text-[10px]">' + initials(sm.name) + '</div><div><div class="text-xs font-medium text-slate-900">' + esc(sm.name) + '</div><div class="text-[10px] text-slate-400">' + esc(sm.role || '') + '</div></div></div></td>' +
+      '<td class="px-5 py-3 text-right text-xs text-slate-600">' + fmtNum(sm.capacity) + '</td>' +
+      '<td class="px-5 py-3 text-right text-xs text-slate-600">' + fmtNum(sm.planned) + '</td>' +
+      '<td class="px-5 py-3 text-right text-xs text-slate-600">' + fmtNum(sm.actual) + '</td>' +
+      '<td class="px-5 py-3 text-right"><div class="flex items-center justify-end gap-2"><div class="w-16 bg-slate-100 rounded-full h-1.5"><div class="h-1.5 rounded-full gauge-bar ' + utilizationColor(sm.utilization) + '" style="width: ' + Math.min(sm.utilization, 100) + '%"></div></div><span class="text-xs font-semibold ' + utilizationTextColor(sm.utilization) + '">' + fmtPct(sm.utilization) + '</span></div></td>' +
+      '<td class="px-5 py-3 text-right text-xs text-slate-600">' + fmtCurrency(sm.planned * sm.rate) + '</td>' +
+    '</tr>';
+  }
+
+  // --- Budget usage by project ---
+  var budgetRows = '';
+  for (var i = 0; i < projects.length; i++) {
+    var p = projects[i];
+    var totalPlanned = 0, totalActual = 0;
+    for (var j = 0; j < allocs.length; j++) {
+      if (allocs[j].project_id === p.id) {
+        totalPlanned += (parseFloat(allocs[j].planned_hours) || 0);
+        totalActual += (parseFloat(allocs[j].actual_hours) || 0);
+      }
+    }
+    var budget = parseFloat(p.budget_hours) || 0;
+    var budgetPct = budget > 0 ? (totalPlanned / budget * 100) : 0;
+    var revenue = (parseFloat(p.blended_rate) || 0) * totalPlanned;
+
+    budgetRows += '<tr class="border-b border-slate-50 hover:bg-slate-50/50">' +
+      '<td class="px-5 py-3"><div class="flex items-center gap-2"><div class="w-2 h-5 rounded-full" style="background: ' + (p.color || '#6366F1') + '"></div><div class="text-xs font-medium text-slate-900">' + esc(p.name) + '</div></div></td>' +
+      '<td class="px-5 py-3 text-right text-xs text-slate-600">' + esc(p.client_name || 'Internal') + '</td>' +
+      '<td class="px-5 py-3 text-right text-xs text-slate-600">' + fmtNum(budget) + '</td>' +
+      '<td class="px-5 py-3 text-right text-xs text-slate-600">' + fmtNum(totalPlanned) + '</td>' +
+      '<td class="px-5 py-3 text-right text-xs text-slate-600">' + fmtNum(totalActual) + '</td>' +
+      '<td class="px-5 py-3 text-right"><div class="flex items-center justify-end gap-2"><div class="w-16 bg-slate-100 rounded-full h-1.5"><div class="h-1.5 rounded-full gauge-bar ' + (budgetPct > 90 ? 'bg-red-500' : budgetPct > 70 ? 'bg-amber-500' : 'bg-indigo-500') + '" style="width: ' + Math.min(budgetPct, 100) + '%"></div></div><span class="text-xs font-semibold ' + (budgetPct > 90 ? 'text-red-600' : 'text-slate-700') + '">' + fmtPct(budgetPct) + '</span></div></td>' +
+      '<td class="px-5 py-3 text-right text-xs font-medium text-emerald-600">' + fmtCurrency(revenue) + '</td>' +
+    '</tr>';
+  }
+
+  // --- Summary KPIs ---
+  var totalRevenue = 0, totalBudgetHrs = 0, totalUsedHrs = 0;
+  for (var i = 0; i < projects.length; i++) {
+    var p = projects[i];
+    var projPlanned = 0;
+    for (var j = 0; j < allocs.length; j++) {
+      if (allocs[j].project_id === p.id) {
+        projPlanned += (parseFloat(allocs[j].planned_hours) || 0);
+      }
+    }
+    totalRevenue += (parseFloat(p.blended_rate) || 0) * projPlanned;
+    totalBudgetHrs += (parseFloat(p.budget_hours) || 0);
+    totalUsedHrs += projPlanned;
+  }
+  var overallBudgetPct = totalBudgetHrs > 0 ? (totalUsedHrs / totalBudgetHrs * 100) : 0;
+
+  el.innerHTML = '<div class="fade-in">' +
+    '<div class="mb-6"><h2 class="text-2xl font-bold text-slate-900">Reports</h2><p class="text-sm text-slate-500 mt-1">Resource utilization and financial summary</p></div>' +
+
+    // Summary cards
+    '<div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">' +
+      '<div class="card bg-white rounded-xl p-5 border border-slate-200 shadow-sm">' +
+        '<div class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">Total Revenue Potential</div>' +
+        '<div class="text-2xl font-bold text-emerald-600">' + fmtCurrency(totalRevenue) + '</div>' +
+        '<div class="text-xs text-slate-400 mt-1">across all projects (all time)</div>' +
+      '</div>' +
+      '<div class="card bg-white rounded-xl p-5 border border-slate-200 shadow-sm">' +
+        '<div class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">Overall Budget Usage</div>' +
+        '<div class="text-2xl font-bold ' + (overallBudgetPct > 90 ? 'text-red-600' : 'text-indigo-600') + '">' + fmtPct(overallBudgetPct) + '</div>' +
+        '<div class="text-xs text-slate-400 mt-1">' + fmtNum(totalUsedHrs) + ' of ' + fmtNum(totalBudgetHrs) + ' hrs</div>' +
+      '</div>' +
+      '<div class="card bg-white rounded-xl p-5 border border-slate-200 shadow-sm">' +
+        '<div class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">Team Size</div>' +
+        '<div class="text-2xl font-bold text-slate-900">' + members.length + ' members</div>' +
+        '<div class="text-xs text-slate-400 mt-1">' + projects.length + ' projects tracked</div>' +
+      '</div>' +
+    '</div>' +
+
+    // Utilization table
+    '<div class="bg-white rounded-xl border border-slate-200 shadow-sm mb-8">' +
+      '<div class="px-5 py-4 border-b border-slate-100"><h3 class="font-semibold text-slate-900 text-sm">Team Utilization (' + currentMonth + ')</h3></div>' +
+      '<div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="border-b border-slate-100 text-left">' +
+        '<th class="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Member</th>' +
+        '<th class="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Capacity</th>' +
+        '<th class="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Planned</th>' +
+        '<th class="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Actual</th>' +
+        '<th class="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Utilization</th>' +
+        '<th class="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Revenue</th>' +
+      '</tr></thead><tbody>' + utilRows + '</tbody></table></div>' +
+    '</div>' +
+
+    // Budget table
+    '<div class="bg-white rounded-xl border border-slate-200 shadow-sm">' +
+      '<div class="px-5 py-4 border-b border-slate-100"><h3 class="font-semibold text-slate-900 text-sm">Project Budget Usage (All Time)</h3></div>' +
+      '<div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="border-b border-slate-100 text-left">' +
+        '<th class="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Project</th>' +
+        '<th class="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Client</th>' +
+        '<th class="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Budget Hrs</th>' +
+        '<th class="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Planned</th>' +
+        '<th class="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Actual</th>' +
+        '<th class="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Budget Used</th>' +
+        '<th class="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Revenue</th>' +
+      '</tr></thead><tbody>' + budgetRows + '</tbody></table></div>' +
+    '</div>' +
+  '</div>';
+}
+
+// ==================== INIT ====================
+loadAllData();
+</script>
+</body>
+</html>
